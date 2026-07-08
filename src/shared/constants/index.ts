@@ -1,3 +1,7 @@
-// Public API for the constants module.
-// Internal files are private; import only from this index.
-export {};
+// Public API for the shared constants module.
+export {
+  NODE_CATALOG,
+  NODE_DESCRIPTORS,
+  createDefaultConfig,
+} from './nodeCatalog';
+export { WORKFLOW_TEMPLATES } from './templates';
