@@ -6,6 +6,7 @@ import type {
   WorkflowNodeType,
 } from '@/shared/types';
 import { createNodeData } from './nodeCatalog';
+import { WORKFLOW_EDGE_TYPE } from './edge';
 
 /**
  * Pre-built workflow templates used to seed the Templates screen. These are
@@ -24,7 +25,12 @@ function buildNode<T extends WorkflowNodeType>(
 
 /** Builds a directed edge between two nodes. */
 function buildEdge(source: string, target: string): WorkflowEdge {
-  return { id: `${source}->${target}`, source, target };
+  return {
+    id: `${source}->${target}`,
+    source,
+    target,
+    type: WORKFLOW_EDGE_TYPE,
+  };
 }
 
 const COL = 260;

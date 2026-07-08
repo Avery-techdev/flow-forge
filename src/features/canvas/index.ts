@@ -1,3 +1,4 @@
-// Public API for the canvas module.
-// Internal files are private; import only from this index.
-export {};
+// Public API for the canvas feature.
+export { WorkflowCanvas } from './WorkflowCanvas';
+export { edgeTypes } from './edgeTypes';
+export { useCanvasDrop } from './useCanvasDrop';

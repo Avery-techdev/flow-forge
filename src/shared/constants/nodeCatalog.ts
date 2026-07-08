@@ -100,7 +100,7 @@ export const NODE_CATALOG: Record<WorkflowNodeType, NodeTypeDescriptor> = {
     category: 'output',
     label: 'Slack',
     description: 'Post a Slack message.',
-    icon: 'Slack',
+    icon: 'Hash',
   },
   discord: {
     type: 'discord',

@@ -6,12 +6,15 @@ import type { WorkflowStore } from './workflowStore';
  * is computed from the single source of truth on read.
  */
 
-/** The currently selected node, or `undefined` when none is selected. */
+/**
+ * The currently selected node, or `undefined` when none is selected. Selection
+ * is owned by React Flow (`node.selected`), so it is derived here rather than
+ * stored a second time.
+ */
 export function selectSelectedNode(
   state: WorkflowStore,
 ): WorkflowNode | undefined {
-  if (!state.selectedNodeId) return undefined;
-  return state.nodes.find((n) => n.id === state.selectedNodeId);
+  return state.nodes.find((n) => n.selected);
 }
 
 /** Curried selector for a node's run status (defaults to `'idle'`). */

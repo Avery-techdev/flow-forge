@@ -1,3 +1,5 @@
-// Public API for the nodes module.
-// Internal files are private; import only from this index.
-export {};
+// Public API for the nodes feature.
+export { WorkflowNodeCard } from './WorkflowNodeCard';
+export { nodeTypes } from './nodeTypes';
+export { resolveNodeIcon } from './iconMap';
+export { CATEGORY_STYLES } from './categoryStyles';

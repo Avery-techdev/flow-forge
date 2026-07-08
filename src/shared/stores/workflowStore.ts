@@ -17,7 +17,7 @@ import type {
   WorkflowNode,
   WorkflowNodeType,
 } from '@/shared/types';
-import { createNodeData } from '@/shared/constants';
+import { createNodeData, WORKFLOW_EDGE_TYPE } from '@/shared/constants';
 import { pushSnapshot, type WorkflowSnapshot } from './history';
 
 const DEFAULT_WORKFLOW_NAME = 'Untitled Workflow';
@@ -34,7 +34,6 @@ type WorkflowState = {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   workflowName: string;
-  selectedNodeId: string | null;
   executionState: ExecutionState;
   past: WorkflowSnapshot[];
   future: WorkflowSnapshot[];
@@ -52,8 +51,7 @@ type WorkflowActions = {
   connect: (connection: Connection) => void;
   disconnect: (edgeId: string) => void;
 
-  // Selection & meta.
-  selectNode: (id: string | null) => void;
+  // Meta. Selection is owned by React Flow (node.selected), not duplicated here.
   setWorkflowName: (name: string) => void;
   loadWorkflow: (workflow: Workflow) => void;
 
@@ -93,7 +91,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [],
   edges: [],
   workflowName: DEFAULT_WORKFLOW_NAME,
-  selectedNodeId: null,
   executionState: INITIAL_EXECUTION_STATE,
   past: [],
   future: [],
@@ -128,7 +125,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       future: [],
       nodes: s.nodes.filter((n) => n.id !== id),
       edges: s.edges.filter((e) => e.source !== id && e.target !== id),
-      selectedNodeId: s.selectedNodeId === id ? null : s.selectedNodeId,
     }));
   },
 
@@ -155,7 +151,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       return {
         past: pushSnapshot(s.past, snapshotOf(s)),
         future: [],
-        edges: addEdge(connection, s.edges),
+        edges: addEdge({ ...connection, type: WORKFLOW_EDGE_TYPE }, s.edges),
       };
     });
   },
@@ -166,10 +162,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       future: [],
       edges: s.edges.filter((e) => e.id !== edgeId),
     }));
-  },
-
-  selectNode: (id) => {
-    set({ selectedNodeId: id });
   },
 
   setWorkflowName: (name) => {
@@ -185,7 +177,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: workflow.nodes,
       edges: workflow.edges,
       workflowName: workflow.name,
-      selectedNodeId: null,
       executionState: INITIAL_EXECUTION_STATE,
       past: [],
       future: [],

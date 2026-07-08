@@ -6,3 +6,4 @@ export {
   createNodeData,
 } from './nodeCatalog';
 export { WORKFLOW_TEMPLATES } from './templates';
+export { WORKFLOW_EDGE_TYPE, NODE_DND_MIME } from './edge';
