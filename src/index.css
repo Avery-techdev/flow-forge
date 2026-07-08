@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+/* Enable class-based dark mode: `.dark` on <html> toggles the variant. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/**
+ * FlowForge Design Tokens (Light SaaS — Zapier-inspired).
+ * Exposed as Tailwind theme colors, e.g. `bg-surface`, `text-content-secondary`.
+ * Dark-mode overrides live in the `.dark` block below.
+ */
+@theme {
+  --color-background: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-surface-canvas: #fafafa;
+  --color-border: #e4e4e7;
+  --color-primary: #6366f1;
+  --color-accent: #f59e0b;
+  --color-content: #18181b;
+  --color-content-secondary: #71717a;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+}
+
+/* Dark-mode token overrides (opt-in via `.dark` on the root element). */
+.dark {
+  --color-background: #18181b;
+  --color-surface: #27272a;
+  --color-surface-canvas: #1f1f23;
+  --color-border: #3f3f46;
+  --color-content: #fafafa;
+  --color-content-secondary: #a1a1aa;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-content);
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
