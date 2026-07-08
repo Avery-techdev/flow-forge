@@ -1,6 +1,7 @@
 import type {
   NodeConfigByType,
   NodeTypeDescriptor,
+  WorkflowNodeData,
   WorkflowNodeType,
 } from '@/shared/types';
 
@@ -227,4 +228,19 @@ export function createDefaultConfig<T extends WorkflowNodeType>(
   type: T,
 ): NodeConfigByType[T] {
   return structuredClone(DEFAULT_CONFIG[type]);
+}
+
+/**
+ * Builds a node's data payload with default config plus optional overrides.
+ * This is the single place that asserts the `type`/`config` correlation which
+ * TS cannot prove for a generic `T`; all call sites stay fully typed.
+ */
+export function createNodeData<T extends WorkflowNodeType>(
+  type: T,
+  overrides: Partial<NodeConfigByType[T]> = {},
+): WorkflowNodeData {
+  return {
+    type,
+    config: { ...createDefaultConfig(type), ...overrides },
+  } as WorkflowNodeData;
 }

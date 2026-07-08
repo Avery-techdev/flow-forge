@@ -109,12 +109,14 @@ export type NodeConfig<T extends WorkflowNodeType = WorkflowNodeType> =
  * Data payload carried by a React Flow node. Distributing over the union keeps
  * `type` and `config` correlated: a `'http-request'` node can only hold an
  * `HttpRequestConfig`.
+ *
+ * Run status is deliberately NOT stored here — it is owned solely by
+ * `ExecutionState` (single source of truth) and read via selectors.
  */
 export type WorkflowNodeData = {
   [T in WorkflowNodeType]: {
     type: T;
     config: NodeConfigByType[T];
-    status: NodeStatus;
   };
 }[WorkflowNodeType];
 

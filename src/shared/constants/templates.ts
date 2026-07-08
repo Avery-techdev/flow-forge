@@ -3,10 +3,9 @@ import type {
   Workflow,
   WorkflowEdge,
   WorkflowNode,
-  WorkflowNodeData,
   WorkflowNodeType,
 } from '@/shared/types';
-import { createDefaultConfig } from './nodeCatalog';
+import { createNodeData } from './nodeCatalog';
 
 /**
  * Pre-built workflow templates used to seed the Templates screen. These are
@@ -20,16 +19,7 @@ function buildNode<T extends WorkflowNodeType>(
   position: { x: number; y: number },
   overrides: Partial<NodeConfigByType[T]> = {},
 ): WorkflowNode {
-  // The `type`/`config` correlation is guaranteed here by construction, but TS
-  // cannot prove a generic `T` is a member of the distributive union, so this
-  // factory is the single place that asserts it. Call sites stay fully typed.
-  const data = {
-    type,
-    config: { ...createDefaultConfig(type), ...overrides },
-    status: 'idle',
-  } as WorkflowNodeData;
-
-  return { id, type, position, data };
+  return { id, type, position, data: createNodeData(type, overrides) };
 }
 
 /** Builds a directed edge between two nodes. */

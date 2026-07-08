@@ -1,3 +1,9 @@
-// Public API for the stores module.
-// Internal files are private; import only from this index.
-export {};
+// Public API for the shared stores module.
+export { useWorkflowStore, type WorkflowStore } from './workflowStore';
+export {
+  selectSelectedNode,
+  selectNodeStatus,
+  selectCanUndo,
+  selectCanRedo,
+  selectIsExecuting,
+} from './workflowSelectors';
