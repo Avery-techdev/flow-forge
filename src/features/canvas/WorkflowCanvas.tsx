@@ -46,6 +46,7 @@ export function WorkflowCanvas(): React.JSX.Element {
         edgeTypes={edgeTypes}
         defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         fitView
+        minZoom={0.2}
         proOptions={{ hideAttribution: true }}
         className="bg-surface-canvas"
       >
