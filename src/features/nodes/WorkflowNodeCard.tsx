@@ -2,10 +2,14 @@ import { createElement } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { WorkflowNode } from '@/shared/types';
 import { useWorkflowStore, selectNodeStatus } from '@/shared/stores';
+import { useOrientation } from '@/shared/hooks';
 import { NODE_CATALOG, CATEGORY_LABELS } from '@/shared/constants';
 import { resolveNodeIcon } from './iconMap';
 import { CATEGORY_STYLES } from './categoryStyles';
 import { StatusBadge } from './StatusBadge';
+
+const HANDLE_CLASS =
+  'h-2.5! w-2.5! border-2! border-surface! bg-content-secondary!';
 
 /**
  * Generic, data-driven canvas node. A single component renders every node type
@@ -24,9 +28,16 @@ export function WorkflowNodeCard({
     'aria-hidden': true,
   });
   const status = useWorkflowStore(selectNodeStatus(id));
+  const orientation = useOrientation();
 
   const hasTarget = descriptor.category !== 'trigger';
   const hasSource = descriptor.category !== 'output';
+
+  // Flow direction: left→right on desktop, top→bottom on mobile.
+  const targetPosition =
+    orientation === 'vertical' ? Position.Top : Position.Left;
+  const sourcePosition =
+    orientation === 'vertical' ? Position.Bottom : Position.Right;
 
   return (
     <div
@@ -41,8 +52,8 @@ export function WorkflowNodeCard({
       {hasTarget && (
         <Handle
           type="target"
-          position={Position.Left}
-          className="h-2.5! w-2.5! border-2! border-surface! bg-content-secondary!"
+          position={targetPosition}
+          className={HANDLE_CLASS}
         />
       )}
 
@@ -73,8 +84,8 @@ export function WorkflowNodeCard({
       {hasSource && (
         <Handle
           type="source"
-          position={Position.Right}
-          className="h-2.5! w-2.5! border-2! border-surface! bg-content-secondary!"
+          position={sourcePosition}
+          className={HANDLE_CLASS}
         />
       )}
     </div>
