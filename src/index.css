@@ -51,3 +51,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/**
+ * Prevent the mobile browser's double-tap-to-zoom gesture from firing on tap
+ * targets (it otherwise enlarges the whole page when a control is tapped,
+ * e.g. the React Flow zoom buttons at min zoom). `manipulation` keeps normal
+ * tap/scroll/pinch behaviour.
+ */
+button,
+.react-flow__controls-button {
+  touch-action: manipulation;
+}

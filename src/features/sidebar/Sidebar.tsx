@@ -1,8 +1,8 @@
 import { Workflow, X } from 'lucide-react';
 import { useUiStore } from '@/shared/stores';
+import { useFocusTrap } from '@/shared/hooks';
 import { SidebarNav } from './SidebarNav';
 import { NodeLibrary } from './NodeLibrary';
-import { useFocusTrap } from './useFocusTrap';
 
 /** Brand header + navigation + node library — shared by both layouts. */
 function SidebarContent({

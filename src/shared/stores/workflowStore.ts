@@ -52,6 +52,7 @@ type WorkflowActions = {
   disconnect: (edgeId: string) => void;
 
   // Meta. Selection is owned by React Flow (node.selected), not duplicated here.
+  clearSelection: () => void;
   setWorkflowName: (name: string) => void;
   loadWorkflow: (workflow: Workflow) => void;
 
@@ -128,10 +129,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }));
   },
 
+  // Live per-field edit from the properties form. Transient like node dragging:
+  // it does NOT push history, otherwise every keystroke would be an undo step.
+  // History tracks graph structure (add/remove/connect/disconnect), not content.
   updateNodeConfig: (id, patch) => {
     set((s) => ({
-      past: pushSnapshot(s.past, snapshotOf(s)),
-      future: [],
       nodes: s.nodes.map((n) =>
         n.id === id
           ? // Shallow-merge into the node's config. The patch is validated by
@@ -161,6 +163,14 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       past: pushSnapshot(s.past, snapshotOf(s)),
       future: [],
       edges: s.edges.filter((e) => e.id !== edgeId),
+    }));
+  },
+
+  clearSelection: () => {
+    set((s) => ({
+      nodes: s.nodes.some((n) => n.selected)
+        ? s.nodes.map((n) => (n.selected ? { ...n, selected: false } : n))
+        : s.nodes,
     }));
   },
 

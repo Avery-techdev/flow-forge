@@ -5,6 +5,7 @@ import { WORKFLOW_TEMPLATES } from '@/shared/constants';
 import { useUiStore, useWorkflowStore } from '@/shared/stores';
 import { WorkflowCanvas } from '@/features/canvas';
 import { Sidebar } from '@/features/sidebar';
+import { PropertiesPanel } from '@/features/properties';
 
 /**
  * Root application shell: sidebar + canvas. The Toolbar (with its own menu
@@ -43,9 +44,12 @@ function App(): React.JSX.Element {
             </span>
           </header>
 
-          <main className="min-h-0 flex-1 bg-surface-canvas">
-            <WorkflowCanvas />
-          </main>
+          <div className="flex min-h-0 flex-1">
+            <main className="min-h-0 flex-1 bg-surface-canvas">
+              <WorkflowCanvas />
+            </main>
+            <PropertiesPanel />
+          </div>
         </div>
       </div>
     </ReactFlowProvider>
