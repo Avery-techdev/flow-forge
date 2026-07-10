@@ -7,3 +7,4 @@ export {
   selectCanRedo,
   selectIsExecuting,
 } from './workflowSelectors';
+export { useUiStore, type UiStore } from './uiStore';

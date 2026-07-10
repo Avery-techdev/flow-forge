@@ -1,3 +1,2 @@
-// Public API for the sidebar module.
-// Internal files are private; import only from this index.
-export {};
+// Public API for the sidebar feature.
+export { Sidebar } from './Sidebar';

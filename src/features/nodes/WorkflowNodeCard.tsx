@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { WorkflowNode } from '@/shared/types';
 import { useWorkflowStore, selectNodeStatus } from '@/shared/stores';
-import { NODE_CATALOG } from '@/shared/constants';
+import { NODE_CATALOG, CATEGORY_LABELS } from '@/shared/constants';
 import { resolveNodeIcon } from './iconMap';
 import { CATEGORY_STYLES } from './categoryStyles';
 import { StatusBadge } from './StatusBadge';
@@ -31,7 +31,7 @@ export function WorkflowNodeCard({
   return (
     <div
       role="group"
-      aria-label={`${category.label} node: ${data.config.label}`}
+      aria-label={`${CATEGORY_LABELS[descriptor.category]} node: ${data.config.label}`}
       className={`flex w-56 items-stretch overflow-hidden rounded-lg border bg-surface shadow-sm transition-shadow ${
         selected
           ? 'border-primary ring-2 ring-primary/30'
