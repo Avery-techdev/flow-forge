@@ -36,13 +36,21 @@ export function computeRunOrder(
 ): string[] {
   const outgoing = new Map<string, string[]>();
   const hasIncoming = new Set<string>();
+  const connected = new Set<string>();
   for (const node of nodes) outgoing.set(node.id, []);
   for (const edge of edges) {
     outgoing.get(edge.source)?.push(edge.target);
     hasIncoming.add(edge.target);
+    connected.add(edge.source);
+    connected.add(edge.target);
   }
 
-  const roots = nodes.filter((n) => !hasIncoming.has(n.id));
+  // Roots are the trigger points of the flow: connected nodes with no incoming
+  // edge. Isolated nodes (no edges at all) are intentionally excluded — they
+  // are not part of the workflow and must not be executed.
+  const roots = nodes.filter(
+    (n) => connected.has(n.id) && !hasIncoming.has(n.id),
+  );
   const queue = roots.map((n) => n.id);
   const visited = new Set<string>();
   const order: string[] = [];
@@ -57,9 +65,10 @@ export function computeRunOrder(
     }
   }
 
-  // Append any disconnected nodes so they are still executed.
+  // Append connected-but-unreached nodes (e.g. cycles without a clear root) so
+  // every wired node still runs. Isolated nodes stay excluded.
   for (const node of nodes) {
-    if (!visited.has(node.id)) order.push(node.id);
+    if (connected.has(node.id) && !visited.has(node.id)) order.push(node.id);
   }
   return order;
 }

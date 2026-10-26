@@ -53,7 +53,10 @@ type WorkflowActions = {
 
   // Meta. Selection is owned by React Flow (node.selected), not duplicated here.
   clearSelection: () => void;
+  // Live name write (no history). Pair with `pushHistory` at edit start so a
+  // rename is a single undo step, not one per keystroke.
   setWorkflowName: (name: string) => void;
+  pushHistory: () => void;
   loadWorkflow: (workflow: Workflow) => void;
 
   // History.
@@ -175,10 +178,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   setWorkflowName: (name) => {
+    set({ workflowName: name });
+  },
+
+  pushHistory: () => {
     set((s) => ({
       past: pushSnapshot(s.past, snapshotOf(s)),
       future: [],
-      workflowName: name,
     }));
   },
 
