@@ -71,3 +71,22 @@ button,
   --xy-controls-button-border-color: var(--color-border);
   --xy-minimap-background-color: var(--color-surface);
 }
+
+/** Execution simulator: flowing dash + glow on the edge into the running node. */
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.edge-active {
+  stroke-dasharray: 8 4;
+  animation: edge-flow 0.5s linear infinite;
+  filter: drop-shadow(0 0 4px var(--color-accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-active {
+    animation: none;
+  }
+}

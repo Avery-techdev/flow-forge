@@ -34,3 +34,22 @@ export function selectCanRedo(state: WorkflowStore): boolean {
 export function selectIsExecuting(state: WorkflowStore): boolean {
   return state.executionState.status === 'running';
 }
+
+/** How an edge should render during a run. */
+export type EdgeActivity = 'idle' | 'active' | 'inactive';
+
+/**
+ * Curried selector for an edge's execution activity: `active` while its target
+ * node is running, `inactive` for the other edges during a run, and `idle`
+ * whenever no run is in progress.
+ */
+export function selectEdgeActivity(source: string, target: string) {
+  return (state: WorkflowStore): EdgeActivity => {
+    const { status, nodeStates } = state.executionState;
+    if (status !== 'running') return 'idle';
+    const isActive =
+      nodeStates[target]?.status === 'running' &&
+      nodeStates[source]?.status === 'success';
+    return isActive ? 'active' : 'inactive';
+  };
+}

@@ -12,8 +12,8 @@ export type ExecutionRunner = {
 /**
  * Drives the mock execution from the toolbar's Run button. It computes the run
  * order and feeds the simulator's progress callbacks straight into the store
- * mutators, so node status is reflected by the existing status badges. Step 9
- * layers the Framer Motion visuals on top of the same state transitions.
+ * mutators, so node status drives the badges, the node glow and the active-edge
+ * highlight, all derived from the same state transitions.
  */
 export function useExecutionRunner(): ExecutionRunner {
   const nodeCount = useWorkflowStore((s) => s.nodes.length);

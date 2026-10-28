@@ -1,10 +1,14 @@
+import { useWorkflowStore, selectEdgeActivity } from '@/shared/stores';
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
 
 /**
  * Custom workflow edge rendered in the amber accent color. Uses a smooth bezier
- * path; the execution highlight (animated dash) is layered on in Step 9.
+ * path. While a run is in progress the edge into the running node is
+ * highlighted with a flowing dash and glow; the other edges dim.
  */
 export function WorkflowEdge({
+  source,
+  target,
   sourceX,
   sourceY,
   targetX,
@@ -13,6 +17,7 @@ export function WorkflowEdge({
   targetPosition,
   markerEnd,
 }: EdgeProps): React.JSX.Element {
+  const activity = useWorkflowStore(selectEdgeActivity(source, target));
   const [path] = getBezierPath({
     sourceX,
     sourceY,
@@ -26,7 +31,13 @@ export function WorkflowEdge({
     <BaseEdge
       path={path}
       markerEnd={markerEnd}
-      style={{ stroke: 'var(--color-accent)', strokeWidth: 2 }}
+      className={activity === 'active' ? 'edge-active' : undefined}
+      style={{
+        stroke: 'var(--color-accent)',
+        strokeWidth: activity === 'active' ? 3 : 2,
+        opacity: activity === 'inactive' ? 0.35 : 1,
+        transition: 'opacity 150ms, stroke-width 150ms',
+      }}
     />
   );
 }

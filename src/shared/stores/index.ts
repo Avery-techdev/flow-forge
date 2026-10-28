@@ -6,6 +6,8 @@ export {
   selectCanUndo,
   selectCanRedo,
   selectIsExecuting,
+  selectEdgeActivity,
+  type EdgeActivity,
 } from './workflowSelectors';
 export { useUiStore, type UiStore } from './uiStore';
 export { isValidConnection } from './connectionRules';
