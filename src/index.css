@@ -62,3 +62,12 @@ button,
 .react-flow__controls-button {
   touch-action: manipulation;
 }
+
+/** Theme React Flow's built-in chrome with the app tokens so it follows dark mode. */
+.react-flow {
+  --xy-controls-button-background-color: var(--color-surface);
+  --xy-controls-button-background-color-hover: var(--color-background);
+  --xy-controls-button-color: var(--color-content);
+  --xy-controls-button-border-color: var(--color-border);
+  --xy-minimap-background-color: var(--color-surface);
+}

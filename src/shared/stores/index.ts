@@ -8,3 +8,4 @@ export {
   selectIsExecuting,
 } from './workflowSelectors';
 export { useUiStore, type UiStore } from './uiStore';
+export { isValidConnection } from './connectionRules';

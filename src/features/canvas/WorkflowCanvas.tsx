@@ -8,11 +8,12 @@ import {
   useReactFlow,
   useUpdateNodeInternals,
   type Connection,
+  type Edge,
   type NodeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { WORKFLOW_EDGE_TYPE } from '@/shared/constants';
-import { useWorkflowStore } from '@/shared/stores';
+import { isValidConnection, useWorkflowStore } from '@/shared/stores';
 import { useOrientation } from '@/shared/hooks';
 import type { WorkflowNode } from '@/shared/types';
 import { nodeTypes } from '@/features/nodes';
@@ -36,6 +37,7 @@ export function WorkflowCanvas(): React.JSX.Element {
   const storeOnNodesChange = useWorkflowStore((s) => s.onNodesChange);
   const onEdgesChange = useWorkflowStore((s) => s.onEdgesChange);
   const connect = useWorkflowStore((s) => s.connect);
+  const pushHistory = useWorkflowStore((s) => s.pushHistory);
   const { onDragOver, onDrop } = useCanvasDrop();
   const orientation = useOrientation();
   const { fitView } = useReactFlow();
@@ -60,6 +62,13 @@ export function WorkflowCanvas(): React.JSX.Element {
     [connect],
   );
 
+  // Live feedback while dragging a connection: React Flow marks the target
+  // handle invalid. The store re-checks on connect, so this is advisory only.
+  const checkConnection = useCallback((connection: Connection | Edge) => {
+    const { nodes: current, edges: currentEdges } = useWorkflowStore.getState();
+    return isValidConnection(current, currentEdges, connection);
+  }, []);
+
   // When the orientation flips, the nodes' handle positions change (Left/Right
   // ↔ Top/Bottom). React Flow caches handle bounds, so it must be told to
   // re-measure them — otherwise edges keep routing to the previous sides.
@@ -79,6 +88,8 @@ export function WorkflowCanvas(): React.JSX.Element {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        isValidConnection={checkConnection}
+        onNodeDragStart={pushHistory}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
@@ -100,7 +111,7 @@ export function WorkflowCanvas(): React.JSX.Element {
           zoomable
           position={isVertical ? 'top-right' : 'bottom-right'}
           className="bg-surface!"
-          maskColor="rgb(244 244 245 / 0.6)"
+          maskColor="color-mix(in srgb, var(--color-background) 60%, transparent)"
           style={isVertical ? { width: 96, height: 72 } : undefined}
         />
       </ReactFlow>

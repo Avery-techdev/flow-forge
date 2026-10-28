@@ -19,6 +19,7 @@ import type {
 } from '@/shared/types';
 import { createNodeData, WORKFLOW_EDGE_TYPE } from '@/shared/constants';
 import { pushSnapshot, type WorkflowSnapshot } from './history';
+import { isValidConnection } from './connectionRules';
 
 const DEFAULT_WORKFLOW_NAME = 'Untitled Workflow';
 
@@ -81,16 +82,6 @@ function snapshotOf(state: WorkflowState): WorkflowSnapshot {
   };
 }
 
-/** Rejects self-loops and duplicate connections (full validation in canvas). */
-function isValidConnection(
-  edges: WorkflowEdge[],
-  connection: Connection,
-): boolean {
-  const { source, target } = connection;
-  if (!source || !target || source === target) return false;
-  return !edges.some((e) => e.source === source && e.target === target);
-}
-
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [],
   edges: [],
@@ -99,12 +90,37 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   past: [],
   future: [],
 
+  // Keyboard deletion arrives here as `remove` changes. It is recorded as one
+  // undo step, and the node's edges go with it so a single delete is a single
+  // step (React Flow's follow-up edge removals then match nothing).
   onNodesChange: (changes) => {
-    set((s) => ({ nodes: applyNodeChanges(changes, s.nodes) }));
+    set((s) => {
+      const removed = new Set(
+        changes.flatMap((c) => (c.type === 'remove' ? [c.id] : [])),
+      );
+      const nodes = applyNodeChanges(changes, s.nodes);
+      if (removed.size === 0) return { nodes };
+      return {
+        past: pushSnapshot(s.past, snapshotOf(s)),
+        future: [],
+        nodes,
+        edges: s.edges.filter(
+          (e) => !removed.has(e.source) && !removed.has(e.target),
+        ),
+      };
+    });
   },
 
   onEdgesChange: (changes) => {
-    set((s) => ({ edges: applyEdgeChanges(changes, s.edges) }));
+    set((s) => {
+      const edges = applyEdgeChanges(changes, s.edges);
+      if (edges.length === s.edges.length) return { edges };
+      return {
+        past: pushSnapshot(s.past, snapshotOf(s)),
+        future: [],
+        edges,
+      };
+    });
   },
 
   addNode: (type, position) => {
@@ -152,7 +168,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   connect: (connection) => {
     set((s) => {
-      if (!isValidConnection(s.edges, connection)) return {};
+      if (!isValidConnection(s.nodes, s.edges, connection)) return {};
       return {
         past: pushSnapshot(s.past, snapshotOf(s)),
         future: [],
