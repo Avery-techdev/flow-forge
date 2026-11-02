@@ -1,4 +1,5 @@
 import { useWorkflowStore } from '@/shared/stores';
+import { AreaErrorBoundary } from '@/shared/components';
 import { WorkflowCanvas } from '@/features/canvas';
 import { PropertiesPanel } from '@/features/properties';
 import { Toolbar } from '@/features/toolbar';
@@ -13,9 +14,13 @@ export function Editor(): React.JSX.Element {
       <h1 className="sr-only">Workflow editor: {workflowName}</h1>
       <div className="flex min-h-0 flex-1">
         <main className="min-h-0 flex-1 bg-surface-canvas">
-          <WorkflowCanvas />
+          <AreaErrorBoundary area="the canvas">
+            <WorkflowCanvas />
+          </AreaErrorBoundary>
         </main>
-        <PropertiesPanel />
+        <AreaErrorBoundary area="the properties panel">
+          <PropertiesPanel />
+        </AreaErrorBoundary>
       </div>
     </>
   );

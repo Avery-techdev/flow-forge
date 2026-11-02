@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useUiStore } from '@/shared/stores';
 import { useApplyTheme, useRestoreWorkflow } from '@/shared/hooks';
+import { AreaErrorBoundary } from '@/shared/components';
 import type { ScreenId } from '@/shared/types';
 import { Sidebar } from '@/features/sidebar';
 import { DashboardScreen } from '@/features/dashboard';
@@ -43,15 +44,17 @@ function App(): React.JSX.Element {
       <div className="flex h-screen w-screen overflow-hidden bg-background">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <Suspense
-            fallback={
-              <p role="status" className="p-6 text-sm text-content-secondary">
-                Loading…
-              </p>
-            }
-          >
-            <Screen />
-          </Suspense>
+          <AreaErrorBoundary area="this screen" resetKeys={[currentScreen]}>
+            <Suspense
+              fallback={
+                <p role="status" className="p-6 text-sm text-content-secondary">
+                  Loading…
+                </p>
+              }
+            >
+              <Screen />
+            </Suspense>
+          </AreaErrorBoundary>
         </div>
       </div>
     </ReactFlowProvider>
