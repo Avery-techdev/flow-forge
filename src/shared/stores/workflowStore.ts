@@ -34,6 +34,7 @@ const INITIAL_EXECUTION_STATE: ExecutionState = {
 type WorkflowState = {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
+  workflowId: string;
   workflowName: string;
   executionState: ExecutionState;
   past: WorkflowSnapshot[];
@@ -85,6 +86,7 @@ function snapshotOf(state: WorkflowState): WorkflowSnapshot {
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [],
   edges: [],
+  workflowId: '',
   workflowName: DEFAULT_WORKFLOW_NAME,
   executionState: INITIAL_EXECUTION_STATE,
   past: [],
@@ -208,6 +210,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes: workflow.nodes,
       edges: workflow.edges,
+      workflowId: workflow.id,
       workflowName: workflow.name,
       executionState: INITIAL_EXECUTION_STATE,
       past: [],

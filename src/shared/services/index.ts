@@ -21,4 +21,8 @@ export {
   loadDraft,
   saveDraft,
   clearDraft,
+  upsertWorkflow,
+  loadExecutions,
+  appendExecution,
+  clearAllData,
 } from './storageService';

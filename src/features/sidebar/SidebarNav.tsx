@@ -8,8 +8,11 @@ import { resolveNavIcon } from './navIcons';
  * marked with `aria-current` for assistive tech.
  */
 export function SidebarNav(): React.JSX.Element {
-  const currentScreen = useUiStore((s) => s.currentScreen);
+  const screen = useUiStore((s) => s.currentScreen);
   const setScreen = useUiStore((s) => s.setScreen);
+  const closeSidebar = useUiStore((s) => s.closeSidebar);
+  // The editor belongs to the Workflows section.
+  const currentScreen = screen === 'editor' ? 'workflows' : screen;
 
   return (
     <nav aria-label="Primary" className="px-3 py-3">
@@ -25,7 +28,10 @@ export function SidebarNav(): React.JSX.Element {
               <button
                 type="button"
                 aria-current={isActive ? 'page' : undefined}
-                onClick={() => setScreen(item.id)}
+                onClick={() => {
+                  setScreen(item.id);
+                  closeSidebar();
+                }}
                 className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-primary/10 text-primary'

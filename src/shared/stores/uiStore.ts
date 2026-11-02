@@ -24,7 +24,7 @@ type UiActions = {
 export type UiStore = UiState & UiActions;
 
 export const useUiStore = create<UiStore>((set) => ({
-  currentScreen: 'workflows',
+  currentScreen: 'dashboard',
   isSidebarOpen: false,
   theme: 'light',
 

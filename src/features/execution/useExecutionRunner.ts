@@ -1,6 +1,10 @@
 import { useCallback } from 'react';
 import { selectIsExecuting, useWorkflowStore } from '@/shared/stores';
-import { computeRunOrder, simulateExecution } from '@/shared/services';
+import {
+  appendExecution,
+  computeRunOrder,
+  simulateExecution,
+} from '@/shared/services';
 
 /** Return shape of the execution runner hook. */
 export type ExecutionRunner = {
@@ -27,12 +31,25 @@ export function useExecutionRunner(): ExecutionRunner {
     if (isExecuting || nodes.length === 0) return;
 
     const order = computeRunOrder(nodes, edges);
+    const { workflowId, workflowName } = useWorkflowStore.getState();
+    const startedAt = Date.now();
     startExecution(order);
     await simulateExecution(order, {
       onNodeRunning: (id) => markNode(id, 'running'),
       onNodeSuccess: (id) => markNode(id, 'success'),
       onNodeError: (id, error) => markNode(id, 'error', error),
-      onComplete: (status) => endExecution(status),
+      onComplete: (status) => {
+        endExecution(status);
+        appendExecution({
+          id: crypto.randomUUID(),
+          workflowId,
+          workflowName,
+          status,
+          nodeCount: order.length,
+          startedAt: new Date(startedAt).toISOString(),
+          durationMs: Date.now() - startedAt,
+        });
+      },
     });
   }, [isExecuting, startExecution, markNode, endExecution]);
 

@@ -11,11 +11,13 @@ export const SCREEN_IDS = [
   'settings',
 ] as const;
 
-export type ScreenId = (typeof SCREEN_IDS)[number];
+/** Navigable screens plus the editor, which is opened from them (not a nav item). */
+export type NavScreenId = (typeof SCREEN_IDS)[number];
+export type ScreenId = NavScreenId | 'editor';
 
 /** A single sidebar navigation entry. */
 export type NavItem = {
-  id: ScreenId;
+  id: NavScreenId;
   label: string;
   /** Lucide icon name, resolved to a component in the sidebar feature. */
   icon: string;

@@ -10,6 +10,7 @@ function SidebarContent({
 }: {
   onClose?: () => void;
 }): React.JSX.Element {
+  const isEditor = useUiStore((s) => s.currentScreen === 'editor');
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface">
       <div className="flex items-center justify-between px-4 py-3">
@@ -35,12 +36,16 @@ function SidebarContent({
 
       <SidebarNav />
 
-      <div className="mx-3 border-t border-border" />
+      {isEditor && (
+        <>
+          <div className="mx-3 border-t border-border" />
 
-      <h2 className="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-content-secondary">
-        Nodes
-      </h2>
-      <NodeLibrary />
+          <h2 className="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-content-secondary">
+            Nodes
+          </h2>
+          <NodeLibrary />
+        </>
+      )}
     </div>
   );
 }

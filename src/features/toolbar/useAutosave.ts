@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SaveStatus, Workflow } from '@/shared/types';
 import { useWorkflowStore } from '@/shared/stores';
-import { saveDraft } from '@/shared/services';
+import { saveDraft, upsertWorkflow } from '@/shared/services';
 
 const AUTOSAVE_DELAY_MS = 3000;
-const DRAFT_ID = 'draft';
 
 /** Public surface of the autosave hook. */
 export type Autosave = {
@@ -13,18 +12,26 @@ export type Autosave = {
   saveNow: () => void;
 };
 
-/** Builds a persistable draft snapshot from the current store state. */
+/** Builds a persistable snapshot from the current store state. */
 function draftFromStore(): Workflow {
-  const { workflowName, nodes, edges } = useWorkflowStore.getState();
+  const { workflowId, workflowName, nodes, edges } =
+    useWorkflowStore.getState();
   const now = new Date().toISOString();
   return {
-    id: DRAFT_ID,
+    id: workflowId,
     name: workflowName,
     nodes,
     edges,
     createdAt: now,
     updatedAt: now,
   };
+}
+
+/** Writes the draft and mirrors it into the saved-workflows collection. */
+function persistNow(): void {
+  const draft = draftFromStore();
+  saveDraft(draft);
+  upsertWorkflow(draft);
 }
 
 /**
@@ -40,9 +47,11 @@ export function useAutosave(): Autosave {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRun = useRef(true);
+  const hasPendingRef = useRef(false);
 
   const persist = useCallback(() => {
-    saveDraft(draftFromStore());
+    persistNow();
+    hasPendingRef.current = false;
     setStatus('saved');
   }, []);
 
@@ -59,6 +68,7 @@ export function useAutosave(): Autosave {
     }
 
     setStatus('saving');
+    hasPendingRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(persist, AUTOSAVE_DELAY_MS);
 
@@ -66,6 +76,15 @@ export function useAutosave(): Autosave {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [nodes, edges, workflowName, persist]);
+
+  // The toolbar unmounts when leaving the editor; flush a pending debounce so
+  // the last edits within the 3 s window are not lost.
+  useEffect(
+    () => () => {
+      if (hasPendingRef.current) persistNow();
+    },
+    [],
+  );
 
   return { status, saveNow };
 }

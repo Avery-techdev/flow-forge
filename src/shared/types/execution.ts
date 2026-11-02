@@ -34,3 +34,14 @@ export type ExecutionState = {
   /** Per-node run state, keyed by node id. */
   nodeStates: Record<string, NodeExecutionState>;
 };
+
+/** A finished run, persisted so the Executions screen can list history. */
+export type ExecutionRecord = {
+  id: string;
+  workflowId: string;
+  workflowName: string;
+  status: 'success' | 'error';
+  nodeCount: number;
+  startedAt: string;
+  durationMs: number;
+};
