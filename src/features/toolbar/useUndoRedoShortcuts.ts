@@ -19,7 +19,7 @@ export function useUndoRedoShortcuts(): void {
   const redo = useWorkflowStore((s) => s.redo);
 
   useEffect(() => {
-    function onKeyDown(event: KeyboardEvent): void {
+    function handleKeyDown(event: KeyboardEvent): void {
       const mod = event.metaKey || event.ctrlKey;
       if (!mod || event.key.toLowerCase() !== 'z') return;
       if (isEditableTarget(event.target)) return;
@@ -29,7 +29,7 @@ export function useUndoRedoShortcuts(): void {
       else undo();
     }
 
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo]);
 }

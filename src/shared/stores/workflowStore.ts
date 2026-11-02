@@ -8,10 +8,7 @@ import {
   type NodeChange,
 } from '@xyflow/react';
 import type {
-  ExecutionState,
   NodeConfig,
-  NodeExecutionState,
-  NodeStatus,
   Workflow,
   WorkflowEdge,
   WorkflowNode,
@@ -20,15 +17,14 @@ import type {
 import { createNodeData, WORKFLOW_EDGE_TYPE } from '@/shared/constants';
 import { pushSnapshot, type WorkflowSnapshot } from './history';
 import { isValidConnection } from './connectionRules';
+import {
+  createExecutionSlice,
+  INITIAL_EXECUTION_SLICE,
+  INITIAL_EXECUTION_STATE,
+  type ExecutionSlice,
+} from './executionSlice';
 
 const DEFAULT_WORKFLOW_NAME = 'Untitled Workflow';
-
-const INITIAL_EXECUTION_STATE: ExecutionState = {
-  status: 'idle',
-  currentNodeId: null,
-  runOrder: [],
-  nodeStates: {},
-};
 
 /** Editable graph state plus execution and history. */
 type WorkflowState = {
@@ -36,7 +32,6 @@ type WorkflowState = {
   edges: WorkflowEdge[];
   workflowId: string;
   workflowName: string;
-  executionState: ExecutionState;
   past: WorkflowSnapshot[];
   future: WorkflowSnapshot[];
 };
@@ -64,15 +59,9 @@ type WorkflowActions = {
   // History.
   undo: () => void;
   redo: () => void;
-
-  // Execution state transitions (orchestration lives in the execution service).
-  startExecution: (runOrder: string[]) => void;
-  markNode: (nodeId: string, status: NodeStatus, error?: string) => void;
-  endExecution: (status: ExecutionState['status']) => void;
-  resetExecution: () => void;
 };
 
-export type WorkflowStore = WorkflowState & WorkflowActions;
+export type WorkflowStore = WorkflowState & WorkflowActions & ExecutionSlice;
 
 /** Snapshots the current structural state for the undo stack. */
 function snapshotOf(state: WorkflowState): WorkflowSnapshot {
@@ -84,11 +73,11 @@ function snapshotOf(state: WorkflowState): WorkflowSnapshot {
 }
 
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
+  ...INITIAL_EXECUTION_SLICE,
   nodes: [],
   edges: [],
   workflowId: '',
   workflowName: DEFAULT_WORKFLOW_NAME,
-  executionState: INITIAL_EXECUTION_STATE,
   past: [],
   future: [],
 
@@ -248,55 +237,5 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     });
   },
 
-  startExecution: (runOrder) => {
-    const nodeStates: Record<string, NodeExecutionState> = {};
-    for (const nodeId of runOrder) {
-      nodeStates[nodeId] = { nodeId, status: 'idle' };
-    }
-    set({
-      executionState: {
-        status: 'running',
-        currentNodeId: null,
-        runOrder,
-        nodeStates,
-      },
-    });
-  },
-
-  markNode: (nodeId, status, error) => {
-    set((s) => {
-      const previous = s.executionState.nodeStates[nodeId];
-      const nextNodeState: NodeExecutionState = {
-        nodeId,
-        status,
-        startedAt: status === 'running' ? Date.now() : previous?.startedAt,
-        finishedAt:
-          status === 'success' || status === 'error'
-            ? Date.now()
-            : previous?.finishedAt,
-        error,
-      };
-      return {
-        executionState: {
-          ...s.executionState,
-          currentNodeId:
-            status === 'running' ? nodeId : s.executionState.currentNodeId,
-          nodeStates: {
-            ...s.executionState.nodeStates,
-            [nodeId]: nextNodeState,
-          },
-        },
-      };
-    });
-  },
-
-  endExecution: (status) => {
-    set((s) => ({
-      executionState: { ...s.executionState, status, currentNodeId: null },
-    }));
-  },
-
-  resetExecution: () => {
-    set({ executionState: INITIAL_EXECUTION_STATE });
-  },
+  ...createExecutionSlice(set),
 }));

@@ -23,7 +23,7 @@ export function NodeLibraryItem({
     'aria-hidden': true,
   });
 
-  const handleDragStart = (event: DragEvent<HTMLButtonElement>) => {
+  const handleDragStart = (event: DragEvent<HTMLButtonElement>): void => {
     event.dataTransfer.setData(NODE_DND_MIME, descriptor.type);
     event.dataTransfer.effectAllowed = 'move';
   };

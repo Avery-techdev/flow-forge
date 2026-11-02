@@ -1,5 +1,17 @@
-import { useWorkflowStore, selectEdgeActivity } from '@/shared/stores';
+import {
+  useWorkflowStore,
+  selectEdgeActivity,
+  type EdgeActivity,
+} from '@/shared/stores';
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
+
+const EDGE_CLASS: Record<EdgeActivity, string> = {
+  idle: 'stroke-accent stroke-2 transition-[opacity,stroke-width]',
+  inactive:
+    'stroke-accent stroke-2 opacity-35 transition-[opacity,stroke-width]',
+  active:
+    'edge-active stroke-accent stroke-3 transition-[opacity,stroke-width]',
+};
 
 /**
  * Custom workflow edge rendered in the amber accent color. Uses a smooth bezier
@@ -31,13 +43,7 @@ export function WorkflowEdge({
     <BaseEdge
       path={path}
       markerEnd={markerEnd}
-      className={activity === 'active' ? 'edge-active' : undefined}
-      style={{
-        stroke: 'var(--color-accent)',
-        strokeWidth: activity === 'active' ? 3 : 2,
-        opacity: activity === 'inactive' ? 0.35 : 1,
-        transition: 'opacity 150ms, stroke-width 150ms',
-      }}
+      className={EDGE_CLASS[activity]}
     />
   );
 }

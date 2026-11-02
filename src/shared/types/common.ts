@@ -21,3 +21,9 @@ export type AuthConfig =
   | { type: 'bearer'; token: string }
   | { type: 'basic'; username: string; password: string }
   | { type: 'apiKey'; key: string; value: string };
+
+/** Typed loading / error / success state for async data. */
+export type AsyncState<T> =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'success'; data: T };

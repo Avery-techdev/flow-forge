@@ -10,8 +10,8 @@ function isWorkflowNodeType(value: string): value is WorkflowNodeType {
 }
 
 type CanvasDropHandlers = {
-  onDragOver: (event: DragEvent) => void;
-  onDrop: (event: DragEvent) => void;
+  handleDragOver: (event: DragEvent) => void;
+  handleDrop: (event: DragEvent) => void;
 };
 
 /**
@@ -22,13 +22,13 @@ export function useCanvasDrop(): CanvasDropHandlers {
   const { screenToFlowPosition } = useReactFlow();
   const addNode = useWorkflowStore((s) => s.addNode);
 
-  const onDragOver = useCallback((event: DragEvent) => {
+  const handleDragOver = useCallback((event: DragEvent): void => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onDrop = useCallback(
-    (event: DragEvent) => {
+  const handleDrop = useCallback(
+    (event: DragEvent): void => {
       event.preventDefault();
       const type = event.dataTransfer.getData(NODE_DND_MIME);
       if (!type || !isWorkflowNodeType(type)) return;
@@ -42,5 +42,5 @@ export function useCanvasDrop(): CanvasDropHandlers {
     [screenToFlowPosition, addNode],
   );
 
-  return { onDragOver, onDrop };
+  return { handleDragOver, handleDrop };
 }

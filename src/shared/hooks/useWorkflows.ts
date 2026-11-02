@@ -1,42 +1,43 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Workflow } from '@/shared/types';
+import type { AsyncState, Workflow } from '@/shared/types';
 import { deleteWorkflow, fetchWorkflows } from '@/shared/services';
 
 /** Return shape of {@link useWorkflows}. */
 export type WorkflowsResource = {
-  workflows: Workflow[];
-  isLoading: boolean;
-  error: string | null;
+  state: AsyncState<Workflow[]>;
   remove: (id: string) => Promise<void>;
 };
 
 /** Loads the saved workflows through the mock API (`GET`/`DELETE /workflows`). */
 export function useWorkflows(): WorkflowsResource {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<AsyncState<Workflow[]>>({
+    status: 'loading',
+  });
 
   useEffect(() => {
-    let cancelled = false;
+    let isCancelled = false;
     fetchWorkflows()
-      .then((loaded) => {
-        if (!cancelled) setWorkflows(loaded);
+      .then((data) => {
+        if (!isCancelled) setState({ status: 'success', data });
       })
       .catch(() => {
-        if (!cancelled) setError('Could not load workflows.');
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!isCancelled) {
+          setState({ status: 'error', message: 'Could not load workflows.' });
+        }
       });
     return () => {
-      cancelled = true;
+      isCancelled = true;
     };
   }, []);
 
-  const remove = useCallback(async (id: string) => {
+  const remove = useCallback(async (id: string): Promise<void> => {
     await deleteWorkflow(id);
-    setWorkflows((prev) => prev.filter((w) => w.id !== id));
+    setState((prev) =>
+      prev.status === 'success'
+        ? { status: 'success', data: prev.data.filter((w) => w.id !== id) }
+        : prev,
+    );
   }, []);
 
-  return { workflows, isLoading, error, remove };
+  return { state, remove };
 }

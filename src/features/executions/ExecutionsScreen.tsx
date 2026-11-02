@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { loadExecutions } from '@/shared/services';
+import { useExecutions } from '@/shared/hooks';
 import { Screen, ScreenHeader } from '@/shared/components';
 import { ExecutionList } from './ExecutionList';
 
 export function ExecutionsScreen(): React.JSX.Element {
-  const [executions] = useState(loadExecutions);
+  const executions = useExecutions();
 
   return (
     <>

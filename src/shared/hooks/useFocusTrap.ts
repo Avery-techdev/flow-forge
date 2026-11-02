@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 
 const FOCUSABLE =
-  'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])';
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Traps keyboard focus within a container while `active`. On activation it
@@ -14,7 +14,7 @@ const FOCUSABLE =
 export function useFocusTrap<T extends HTMLElement>(
   active: boolean,
   onEscape: () => void,
-) {
+): RefObject<T | null> {
   const containerRef = useRef<T>(null);
 
   useEffect(() => {
@@ -23,12 +23,12 @@ export function useFocusTrap<T extends HTMLElement>(
     if (!container) return;
 
     const trigger = document.activeElement as HTMLElement | null;
-    const focusables = () =>
+    const focusables = (): HTMLElement[] =>
       Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE));
 
     focusables()[0]?.focus();
 
-    function onKeyDown(event: KeyboardEvent) {
+    function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
         event.preventDefault();
         onEscape();
@@ -51,9 +51,9 @@ export function useFocusTrap<T extends HTMLElement>(
       }
     }
 
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
       trigger?.focus();
     };
   }, [active, onEscape]);

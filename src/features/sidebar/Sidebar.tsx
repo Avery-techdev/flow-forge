@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Workflow, X } from 'lucide-react';
 import { useUiStore } from '@/shared/stores';
 import { useFocusTrap } from '@/shared/hooks';
@@ -7,8 +8,10 @@ import { NodeLibrary } from './NodeLibrary';
 /** Brand header + navigation + node library — shared by both layouts. */
 function SidebarContent({
   onClose,
+  titleId,
 }: {
   onClose?: () => void;
+  titleId?: string;
 }): React.JSX.Element {
   const isEditor = useUiStore((s) => s.currentScreen === 'editor');
   return (
@@ -18,7 +21,7 @@ function SidebarContent({
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-white">
             <Workflow className="h-4 w-4" aria-hidden="true" />
           </span>
-          <span className="text-base font-semibold text-content">
+          <span id={titleId} className="text-base font-semibold text-content">
             FlowForge
           </span>
         </span>
@@ -56,6 +59,7 @@ function SidebarContent({
  * Escape + backdrop to close).
  */
 export function Sidebar(): React.JSX.Element {
+  const titleId = useId();
   const isOpen = useUiStore((s) => s.isSidebarOpen);
   const closeSidebar = useUiStore((s) => s.closeSidebar);
   const drawerRef = useFocusTrap<HTMLDivElement>(isOpen, closeSidebar);
@@ -70,19 +74,21 @@ export function Sidebar(): React.JSX.Element {
       {/* Mobile: drawer overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/40"
+          <button
+            type="button"
+            tabIndex={-1}
             onClick={closeSidebar}
-            aria-hidden="true"
+            aria-label="Dismiss sidebar"
+            className="absolute inset-0 cursor-default bg-black/40"
           />
           <div
             ref={drawerRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Sidebar"
+            aria-labelledby={titleId}
             className="absolute left-0 top-0 h-full w-72 border-r border-border shadow-xl"
           >
-            <SidebarContent onClose={closeSidebar} />
+            <SidebarContent onClose={closeSidebar} titleId={titleId} />
           </div>
         </div>
       )}

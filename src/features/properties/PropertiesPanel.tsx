@@ -1,6 +1,10 @@
-import { createElement } from 'react';
+import { createElement, useId } from 'react';
 import { X } from 'lucide-react';
-import { NODE_CATALOG, CATEGORY_LABELS } from '@/shared/constants';
+import {
+  NODE_CATALOG,
+  CATEGORY_LABELS,
+  MOBILE_MEDIA_QUERY,
+} from '@/shared/constants';
 import { selectSelectedNode, useWorkflowStore } from '@/shared/stores';
 import { useFocusTrap, useMediaQuery } from '@/shared/hooks';
 import { resolveNodeIcon } from '@/features/nodes';
@@ -12,9 +16,10 @@ import { PropertiesForm } from './PropertiesForm';
  * the node selection (which is owned by React Flow via `node.selected`).
  */
 export function PropertiesPanel(): React.JSX.Element | null {
+  const titleId = useId();
   const node = useWorkflowStore(selectSelectedNode);
   const clearSelection = useWorkflowStore((s) => s.clearSelection);
-  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY);
   const drawerRef = useFocusTrap<HTMLDivElement>(
     Boolean(node) && isMobile,
     clearSelection,
@@ -33,9 +38,9 @@ export function PropertiesPanel(): React.JSX.Element | null {
       <span className="flex items-center gap-2">
         {icon}
         <span className="flex flex-col">
-          <span className="text-sm font-semibold text-content">
+          <h2 id={titleId} className="text-sm font-semibold text-content">
             {descriptor.label}
-          </span>
+          </h2>
           <span className="text-xs text-content-secondary">
             {CATEGORY_LABELS[descriptor.category]}
           </span>
@@ -65,16 +70,18 @@ export function PropertiesPanel(): React.JSX.Element | null {
   if (isMobile) {
     return (
       <div className="fixed inset-0 z-40">
-        <div
-          className="absolute inset-0 bg-black/40"
+        <button
+          type="button"
+          tabIndex={-1}
           onClick={clearSelection}
-          aria-hidden="true"
+          aria-label="Dismiss properties"
+          className="absolute inset-0 cursor-default bg-black/40"
         />
         <div
           ref={drawerRef}
           role="dialog"
           aria-modal="true"
-          aria-label={`${descriptor.label} properties`}
+          aria-labelledby={titleId}
           className="absolute bottom-0 left-0 right-0 max-h-[80vh] rounded-t-xl border-t border-border shadow-xl"
         >
           {body}
@@ -83,5 +90,12 @@ export function PropertiesPanel(): React.JSX.Element | null {
     );
   }
 
-  return <aside className="w-80 shrink-0 border-l border-border">{body}</aside>;
+  return (
+    <aside
+      aria-labelledby={titleId}
+      className="w-80 shrink-0 border-l border-border"
+    >
+      {body}
+    </aside>
+  );
 }

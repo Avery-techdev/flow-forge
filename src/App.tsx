@@ -1,10 +1,7 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
-import { WORKFLOW_TEMPLATES } from '@/shared/constants';
-import { useUiStore, useWorkflowStore } from '@/shared/stores';
-import { loadDraft } from '@/shared/services';
-import { useApplyTheme } from '@/shared/hooks';
-import { instantiateTemplate } from '@/shared/utils';
+import { useUiStore } from '@/shared/stores';
+import { useApplyTheme, useRestoreWorkflow } from '@/shared/hooks';
 import type { ScreenId } from '@/shared/types';
 import { Sidebar } from '@/features/sidebar';
 import { DashboardScreen } from '@/features/dashboard';
@@ -32,16 +29,12 @@ const SCREENS: Record<ScreenId, React.ComponentType> = {
  * workflow. On mount the autosaved draft is restored (or a template seeded).
  */
 function App(): React.JSX.Element {
-  const loadWorkflow = useWorkflowStore((s) => s.loadWorkflow);
   const theme = useUiStore((s) => s.theme);
   const currentScreen = useUiStore((s) => s.currentScreen);
 
   useApplyTheme(theme);
 
-  // Runs once on mount: restore the autosaved draft, else seed a template.
-  useEffect(() => {
-    loadWorkflow(loadDraft() ?? instantiateTemplate(WORKFLOW_TEMPLATES[0]));
-  }, [loadWorkflow]);
+  useRestoreWorkflow();
 
   const Screen = SCREENS[currentScreen];
 

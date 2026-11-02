@@ -1,25 +1,14 @@
-import { WORKFLOW_TEMPLATES } from '@/shared/constants';
-import { computeRunOrder } from '@/shared/services';
 import { useWorkflowActions } from '@/shared/hooks';
 import {
   PRIMARY_BUTTON_CLASS,
   Screen,
   ScreenHeader,
 } from '@/shared/components';
-import type { Workflow } from '@/shared/types';
-
-/** Describes the template's flow as its node labels in run order. */
-function describeFlow(template: Workflow): string {
-  const labels = new Map(
-    template.nodes.map((n) => [n.id, n.data.config.label]),
-  );
-  return computeRunOrder(template.nodes, template.edges)
-    .map((id) => labels.get(id))
-    .join(' → ');
-}
+import { useTemplates } from './useTemplates';
 
 export function TemplatesScreen(): React.JSX.Element {
   const { fromTemplate } = useWorkflowActions();
+  const templates = useTemplates();
 
   return (
     <>
@@ -29,7 +18,7 @@ export function TemplatesScreen(): React.JSX.Element {
       />
       <Screen>
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {WORKFLOW_TEMPLATES.map((template) => (
+          {templates.map(({ template, flow }) => (
             <li
               key={template.id}
               className="flex flex-col rounded-lg border border-border bg-surface p-4 shadow-sm"
@@ -42,7 +31,7 @@ export function TemplatesScreen(): React.JSX.Element {
                 connections
               </p>
               <p className="mt-3 line-clamp-3 flex-1 text-sm text-content-secondary">
-                {describeFlow(template)}
+                {flow}
               </p>
               <button
                 type="button"

@@ -1,5 +1,6 @@
-import { useRef } from 'react';
+import { useId, useRef } from 'react';
 import { useWorkflowStore } from '@/shared/stores';
+import { HiddenLabel } from '@/shared/components';
 
 const FALLBACK_NAME = 'Untitled Workflow';
 
@@ -16,6 +17,8 @@ export function WorkflowNameField(): React.JSX.Element {
   const undo = useWorkflowStore((s) => s.undo);
   const redo = useWorkflowStore((s) => s.redo);
 
+  const id = useId();
+
   // True once this edit session has already recorded its history snapshot.
   const hasSnapshot = useRef(false);
 
@@ -27,7 +30,7 @@ export function WorkflowNameField(): React.JSX.Element {
     setWorkflowName(event.target.value);
   };
 
-  const endEdit = (): void => {
+  const handleBlur = (): void => {
     hasSnapshot.current = false;
     if (!workflowName.trim()) setWorkflowName(FALLBACK_NAME);
   };
@@ -53,15 +56,18 @@ export function WorkflowNameField(): React.JSX.Element {
   };
 
   return (
-    <input
-      type="text"
-      value={workflowName}
-      onChange={handleChange}
-      onBlur={endEdit}
-      onKeyDown={handleKeyDown}
-      aria-label="Workflow name"
-      spellCheck={false}
-      className="min-w-0 max-w-56 truncate rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-content hover:border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-    />
+    <>
+      <HiddenLabel htmlFor={id}>Workflow name</HiddenLabel>
+      <input
+        id={id}
+        type="text"
+        value={workflowName}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        spellCheck={false}
+        className="min-w-0 max-w-56 truncate rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-content hover:border-border focus:border-primary focus:outline-2 focus:outline-primary"
+      />
+    </>
   );
 }

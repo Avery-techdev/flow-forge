@@ -1,5 +1,11 @@
 // Public API for the shared domain types.
-export type { HttpMethod, HeaderPair, AuthType, AuthConfig } from './common';
+export type {
+  HttpMethod,
+  HeaderPair,
+  AuthType,
+  AuthConfig,
+  AsyncState,
+} from './common';
 export { HTTP_METHODS, AUTH_TYPES } from './common';
 
 export type {

@@ -1,4 +1,5 @@
 import type { Orientation } from '@/shared/types';
+import { MOBILE_MEDIA_QUERY } from '@/shared/constants';
 import { useMediaQuery } from './useMediaQuery';
 
 /**
@@ -7,6 +8,6 @@ import { useMediaQuery } from './useMediaQuery';
  * so the viewport stays the single source of truth.
  */
 export function useOrientation(): Orientation {
-  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY);
   return isMobile ? 'vertical' : 'horizontal';
 }

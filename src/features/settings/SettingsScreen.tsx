@@ -1,22 +1,18 @@
 import { useState } from 'react';
-import { clearAllData } from '@/shared/services';
 import { useUiStore } from '@/shared/stores';
 import {
   SECONDARY_BUTTON_CLASS,
   Screen,
   ScreenHeader,
 } from '@/shared/components';
+import { useResetLocalData } from './useResetLocalData';
 
 export function SettingsScreen(): React.JSX.Element {
   const theme = useUiStore((s) => s.theme);
   const toggleTheme = useUiStore((s) => s.toggleTheme);
   const [confirmingReset, setConfirmingReset] = useState(false);
 
-  // Clears persisted data and reloads so the in-memory editor state is reset too.
-  const resetData = () => {
-    clearAllData();
-    window.location.reload();
-  };
+  const resetLocalData = useResetLocalData();
 
   return (
     <>
@@ -49,7 +45,7 @@ export function SettingsScreen(): React.JSX.Element {
               <div className="mt-3 flex gap-2">
                 <button
                   type="button"
-                  onClick={resetData}
+                  onClick={resetLocalData}
                   className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
                 >
                   Confirm reset

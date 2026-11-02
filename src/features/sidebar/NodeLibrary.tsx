@@ -15,7 +15,7 @@ export function NodeLibrary(): React.JSX.Element {
   const addNode = useWorkflowStore((s) => s.addNode);
   const addCountRef = useRef(0);
 
-  const handleAdd = (descriptor: NodeTypeDescriptor) => {
+  const handleAdd = (descriptor: NodeTypeDescriptor): void => {
     const step = addCountRef.current % 6;
     addCountRef.current += 1;
     addNode(descriptor.type, { x: 96 + step * 28, y: 96 + step * 28 });
@@ -42,7 +42,7 @@ export function NodeLibrary(): React.JSX.Element {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search nodes…"
-            className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-2 text-sm text-content placeholder:text-content-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-2 text-sm text-content placeholder:text-content-secondary focus:border-primary focus:outline-2 focus:outline-primary"
           />
         </div>
         <p className="sr-only" role="status">

@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import {
   useController,
@@ -6,6 +7,7 @@ import {
   type Path,
 } from 'react-hook-form';
 import type { HeaderPair } from '@/shared/types';
+import { HiddenLabel } from '@/shared/components';
 
 /**
  * Editor for a list of request headers (key/value rows). The controlled value
@@ -18,26 +20,28 @@ type HeadersFieldProps<T extends FieldValues> = {
 };
 
 const rowInputClass =
-  'w-full rounded-md border border-border bg-surface px-2 py-1 text-sm text-content placeholder:text-content-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30';
+  'w-full rounded-md border border-border bg-surface px-2 py-1 text-sm text-content placeholder:text-content-secondary focus:border-primary focus:outline-2 focus:outline-primary';
 
 export function HeadersField<T extends FieldValues>({
   control,
   name,
   label,
 }: HeadersFieldProps<T>): React.JSX.Element {
+  const id = useId();
   const { field } = useController({ control, name });
   // Boundary: RHF stores this value untyped; the schema guarantees the shape.
   const headers = (field.value ?? []) as HeaderPair[];
 
-  const update = (next: HeaderPair[]) => field.onChange(next);
+  const update = (next: HeaderPair[]): void => field.onChange(next);
 
-  const addRow = () =>
+  const addRow = (): void =>
     update([...headers, { id: crypto.randomUUID(), key: '', value: '' }]);
 
-  const removeRow = (id: string) => update(headers.filter((h) => h.id !== id));
+  const removeRow = (rowId: string): void =>
+    update(headers.filter((h) => h.id !== rowId));
 
-  const editRow = (id: string, patch: Partial<HeaderPair>) =>
-    update(headers.map((h) => (h.id === id ? { ...h, ...patch } : h)));
+  const editRow = (rowId: string, patch: Partial<HeaderPair>): void =>
+    update(headers.map((h) => (h.id === rowId ? { ...h, ...patch } : h)));
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -46,20 +50,26 @@ export function HeadersField<T extends FieldValues>({
         <ul className="flex flex-col gap-1.5">
           {headers.map((header, index) => (
             <li key={header.id} className="flex items-center gap-1.5">
+              <HiddenLabel htmlFor={`${id}-${header.id}-key`}>
+                Header {index + 1} name
+              </HiddenLabel>
               <input
+                id={`${id}-${header.id}-key`}
                 type="text"
                 value={header.key}
                 onChange={(e) => editRow(header.id, { key: e.target.value })}
                 placeholder="Header"
-                aria-label={`Header ${index + 1} name`}
                 className={rowInputClass}
               />
+              <HiddenLabel htmlFor={`${id}-${header.id}-value`}>
+                Header {index + 1} value
+              </HiddenLabel>
               <input
+                id={`${id}-${header.id}-value`}
                 type="text"
                 value={header.value}
                 onChange={(e) => editRow(header.id, { value: e.target.value })}
                 placeholder="Value"
-                aria-label={`Header ${index + 1} value`}
                 className={rowInputClass}
               />
               <button

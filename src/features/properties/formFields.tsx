@@ -58,7 +58,7 @@ function FieldShell({
 }
 
 const inputClass =
-  'w-full rounded-md border bg-surface px-2.5 py-1.5 text-sm text-content placeholder:text-content-secondary focus:outline-none focus:ring-2 focus:ring-primary/30';
+  'w-full rounded-md border bg-surface px-2.5 py-1.5 text-sm text-content placeholder:text-content-secondary focus:outline-2 focus:outline-primary';
 
 function borderClass(hasError: boolean): string {
   return hasError ? 'border-error' : 'border-border focus:border-primary';

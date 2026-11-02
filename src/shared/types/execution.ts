@@ -27,8 +27,6 @@ export type NodeExecutionState = {
 /** Snapshot of a single workflow execution. */
 export type ExecutionState = {
   status: ExecutionStatus;
-  /** Node currently being simulated, or `null` when idle/finished. */
-  currentNodeId: string | null;
   /** Order in which nodes are visited, derived from the edges. */
   runOrder: string[];
   /** Per-node run state, keyed by node id. */

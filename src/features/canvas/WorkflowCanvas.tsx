@@ -38,7 +38,7 @@ export function WorkflowCanvas(): React.JSX.Element {
   const onEdgesChange = useWorkflowStore((s) => s.onEdgesChange);
   const connect = useWorkflowStore((s) => s.connect);
   const pushHistory = useWorkflowStore((s) => s.pushHistory);
-  const { onDragOver, onDrop } = useCanvasDrop();
+  const { handleDragOver, handleDrop } = useCanvasDrop();
   const orientation = useOrientation();
   const { fitView } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
@@ -50,24 +50,28 @@ export function WorkflowCanvas(): React.JSX.Element {
     [isVertical, nodes],
   );
 
-  const onNodesChange = useCallback(
-    (changes: NodeChange<WorkflowNode>[]) => {
+  const handleNodesChange = useCallback(
+    (changes: NodeChange<WorkflowNode>[]): void => {
       storeOnNodesChange(isVertical ? changes.map(transposeChange) : changes);
     },
     [isVertical, storeOnNodesChange],
   );
 
-  const onConnect = useCallback(
-    (connection: Connection) => connect(connection),
+  const handleConnect = useCallback(
+    (connection: Connection): void => connect(connection),
     [connect],
   );
 
   // Live feedback while dragging a connection: React Flow marks the target
   // handle invalid. The store re-checks on connect, so this is advisory only.
-  const checkConnection = useCallback((connection: Connection | Edge) => {
-    const { nodes: current, edges: currentEdges } = useWorkflowStore.getState();
-    return isValidConnection(current, currentEdges, connection);
-  }, []);
+  const checkConnection = useCallback(
+    (connection: Connection | Edge): boolean => {
+      const { nodes: current, edges: currentEdges } =
+        useWorkflowStore.getState();
+      return isValidConnection(current, currentEdges, connection);
+    },
+    [],
+  );
 
   // When the orientation flips, the nodes' handle positions change (Left/Right
   // ↔ Top/Bottom). React Flow caches handle bounds, so it must be told to
@@ -81,13 +85,17 @@ export function WorkflowCanvas(): React.JSX.Element {
   }, [isVertical, updateNodeInternals, fitView]);
 
   return (
-    <div className="h-full w-full" onDragOver={onDragOver} onDrop={onDrop}>
+    <div
+      className="h-full w-full"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       <ReactFlow
         nodes={displayNodes}
         edges={edges}
-        onNodesChange={onNodesChange}
+        onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={handleConnect}
         isValidConnection={checkConnection}
         onNodeDragStart={pushHistory}
         nodeTypes={nodeTypes}

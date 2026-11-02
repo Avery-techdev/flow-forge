@@ -8,7 +8,7 @@ import {
 import { formatDateTime } from '@/shared/utils';
 
 export function WorkflowsScreen(): React.JSX.Element {
-  const { workflows, isLoading, error, remove } = useWorkflows();
+  const { state, remove } = useWorkflows();
   const { openWorkflow, createWorkflow } = useWorkflowActions();
 
   return (
@@ -28,21 +28,21 @@ export function WorkflowsScreen(): React.JSX.Element {
         }
       />
       <Screen>
-        {isLoading ? (
+        {state.status === 'loading' ? (
           <p role="status" className="text-sm text-content-secondary">
             Loading workflows…
           </p>
-        ) : error ? (
+        ) : state.status === 'error' ? (
           <p role="alert" className="text-sm text-red-600">
-            {error}
+            {state.message}
           </p>
-        ) : workflows.length === 0 ? (
+        ) : state.data.length === 0 ? (
           <p className="text-sm text-content-secondary">
             No workflows yet. Create one or start from a template.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {workflows.map((workflow) => (
+            {state.data.map((workflow) => (
               <li
                 key={workflow.id}
                 className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 shadow-sm"
