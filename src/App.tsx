@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { WORKFLOW_TEMPLATES } from '@/shared/constants';
 import { useUiStore, useWorkflowStore } from '@/shared/stores';
@@ -6,31 +6,18 @@ import { loadDraft } from '@/shared/services';
 import { useApplyTheme } from '@/shared/hooks';
 import { instantiateTemplate } from '@/shared/utils';
 import type { ScreenId } from '@/shared/types';
-import { WorkflowCanvas } from '@/features/canvas';
 import { Sidebar } from '@/features/sidebar';
-import { PropertiesPanel } from '@/features/properties';
-import { Toolbar } from '@/features/toolbar';
 import { DashboardScreen } from '@/features/dashboard';
 import { WorkflowsScreen } from '@/features/workflows';
 import { TemplatesScreen } from '@/features/templates';
 import { ExecutionsScreen } from '@/features/executions';
 import { SettingsScreen } from '@/features/settings';
 
-function Editor(): React.JSX.Element {
-  return (
-    <>
-      <Toolbar />
-      <div className="flex min-h-0 flex-1">
-        <main className="min-h-0 flex-1 bg-surface-canvas">
-          <WorkflowCanvas />
-        </main>
-        <PropertiesPanel />
-      </div>
-    </>
-  );
-}
+// The editor pulls in React Flow and Framer Motion, so it is loaded on demand
+// to keep the initial bundle small.
+const Editor = lazy(() => import('@/features/editor'));
 
-const SCREENS: Record<ScreenId, () => React.JSX.Element> = {
+const SCREENS: Record<ScreenId, React.ComponentType> = {
   dashboard: DashboardScreen,
   workflows: WorkflowsScreen,
   templates: TemplatesScreen,
@@ -63,7 +50,15 @@ function App(): React.JSX.Element {
       <div className="flex h-screen w-screen overflow-hidden bg-background">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <Screen />
+          <Suspense
+            fallback={
+              <p role="status" className="p-6 text-sm text-content-secondary">
+                Loading…
+              </p>
+            }
+          >
+            <Screen />
+          </Suspense>
         </div>
       </div>
     </ReactFlowProvider>
