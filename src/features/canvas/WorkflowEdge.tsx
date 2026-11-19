@@ -6,11 +6,11 @@ import {
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
 
 const EDGE_CLASS: Record<EdgeActivity, string> = {
-  idle: 'stroke-accent stroke-2 transition-[opacity,stroke-width]',
+  idle: 'stroke-accent! stroke-2! transition-[opacity,stroke-width]',
   inactive:
-    'stroke-accent stroke-2 opacity-35 transition-[opacity,stroke-width]',
+    'stroke-accent! stroke-2! opacity-35 transition-[opacity,stroke-width]',
   active:
-    'edge-active stroke-accent stroke-3 transition-[opacity,stroke-width]',
+    'edge-active stroke-accent! stroke-3! transition-[opacity,stroke-width]',
 };
 
 /**

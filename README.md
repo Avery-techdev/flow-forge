@@ -2,9 +2,15 @@
 
 A visual workflow automation builder inspired by n8n and Zapier. Drag nodes onto a canvas, connect them, configure each one, and watch the workflow execute node by node. Everything runs in the browser — there is no backend; the API is mocked locally.
 
+## Screenshots
+
+| Execution running                                            | Failed API node                                          | Mobile (vertical flow)                               |
+| ------------------------------------------------------------ | -------------------------------------------------------- | ---------------------------------------------------- |
+| ![Execution running](docs/screenshots/execution-running.png) | ![Execution error](docs/screenshots/execution-error.png) | ![Mobile editor](docs/screenshots/mobile-editor.png) |
+
 ## Highlights
 
-- **Execution simulator** — "Run" walks the graph in connection order. Each node pulses green while it runs and settles into a Success/Error state, while the active edge lights up amber with a flowing dash. Built with Framer Motion and honors `prefers-reduced-motion`.
+- **Execution simulator** — "Run" walks the graph in connection order. Each node pulses green while it runs and settles into a Success/Error state (API nodes can fail and honor their retry setting; the run stops at the failing node), while the active edge lights up amber with a flowing dash. Built with Framer Motion and honors `prefers-reduced-motion`.
 - **15 node types** across Trigger, Logic, API, Data and Output, driven by a single data catalog rather than per-type components.
 - **Connection rules** — invalid connections (self-links, duplicates, cycles, edges out of Output nodes or into Triggers) are rejected while dragging and re-validated in the store.
 - **Dynamic properties panel** — React Hook Form + Zod, with a schema and field set per node type and live validation.
@@ -13,7 +19,7 @@ A visual workflow automation builder inspired by n8n and Zapier. Drag nodes onto
 - **Responsive** — the flow switches from horizontal to vertical on mobile, and the sidebar becomes an accessible drawer (focus trap, Escape to close).
 - **Light and dark theme**, with canvas chrome themed from the same design tokens.
 - **Screens** — Dashboard, Workflows, Templates (Lead Pipeline, CRM Sync, Invoice Automation), Executions history and Settings.
-- **Mock API** — `GET/POST/PUT/DELETE /workflows` with simulated latency over localStorage, plus a node-by-node execution service.
+- **Mock API** — `GET/POST/PUT/DELETE /workflows` with simulated latency over localStorage, plus `POST /execute`, a node-by-node execution service.
 
 ## Tech stack
 
@@ -42,6 +48,7 @@ src/
 npm install
 npm run dev      # start the dev server
 npm run build    # type-check and build for production
+npm run test     # Vitest unit tests
 npm run lint     # ESLint
 npm run format   # Prettier
 ```

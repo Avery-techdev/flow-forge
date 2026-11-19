@@ -40,10 +40,14 @@ export function ToolbarButton({
       disabled={disabled}
       title={label}
       aria-label={label}
-      className={`inline-flex h-9 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${VARIANT_CLASSES[variant]}`}
+      className={`inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2 text-sm font-medium transition-colors ${VARIANT_CLASSES[variant]}`}
     >
       {createElement(icon, { className: 'h-4 w-4', 'aria-hidden': true })}
-      {showText && <span>{label}</span>}
+      {showText && (
+        <span className="sr-only whitespace-nowrap sm:not-sr-only">
+          {label}
+        </span>
+      )}
     </button>
   );
 }

@@ -1,4 +1,10 @@
-import type { WorkflowEdge, WorkflowNode } from '@/shared/types';
+import type {
+  ExecutionRecord,
+  WorkflowEdge,
+  WorkflowNode,
+} from '@/shared/types';
+import { NODE_CATALOG } from '@/shared/constants';
+import { appendExecution } from './storageService';
 import { randomDelay } from './timing';
 
 /**
@@ -10,8 +16,13 @@ import { randomDelay } from './timing';
 const NODE_MIN_DELAY_MS = 300;
 const NODE_MAX_DELAY_MS = 500;
 
+/** Chance that a single API call attempt fails in the simulation. */
+const API_FAILURE_RATE = 0.2;
+const MAX_RETRIES = 5;
+
 /** Progress callbacks invoked as the simulated run advances. */
 export type ExecutionHandlers = {
+  onStart: (order: string[]) => void;
   onNodeRunning: (nodeId: string) => void;
   onNodeSuccess: (nodeId: string) => void;
   onNodeError: (nodeId: string, error: string) => void;
@@ -23,6 +34,16 @@ export type ExecutionOptions = {
   minDelayMs?: number;
   maxDelayMs?: number;
   signal?: AbortSignal;
+  /** Source of randomness in `[0, 1)`; injectable for deterministic tests. */
+  random?: () => number;
+};
+
+/** Request body of `POST /execute`. */
+export type ExecuteRequest = {
+  workflowId: string;
+  workflowName: string;
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
 };
 
 /**
@@ -73,12 +94,34 @@ export function computeRunOrder(
   return order;
 }
 
+/** Retry count configured on a node (only HTTP requests expose one). */
+function retriesOf(node: WorkflowNode): number {
+  const config = node.data.config;
+  const retry = 'retry' in config ? config.retry : 0;
+  return Math.min(Math.max(retry, 0), MAX_RETRIES);
+}
+
 /**
- * Runs the simulated execution, awaiting a short delay per node. Every node
- * succeeds in this mock; the error path is exposed via handlers for future use.
- * Resolves when the run completes or is aborted via `options.signal`.
+ * Simulates one node. Only API nodes can fail: each attempt fails with
+ * `API_FAILURE_RATE`, and the node errors once all attempts (1 + retries)
+ * have failed. Returns an error message, or `null` on success.
+ */
+function simulateNode(node: WorkflowNode, random: () => number): string | null {
+  if (NODE_CATALOG[node.data.type].category !== 'api') return null;
+  const attempts = 1 + retriesOf(node);
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (random() >= API_FAILURE_RATE) return null;
+  }
+  return `${node.data.config.label}: request failed (503 Service Unavailable)`;
+}
+
+/**
+ * Runs the simulated execution, awaiting a short delay per node. The run stops
+ * at the first failing node; later nodes stay idle. Resolves when the run
+ * completes, fails or is aborted via `options.signal`.
  */
 export async function simulateExecution(
+  nodes: WorkflowNode[],
   order: string[],
   handlers: ExecutionHandlers,
   options: ExecutionOptions = {},
@@ -87,14 +130,64 @@ export async function simulateExecution(
     minDelayMs = NODE_MIN_DELAY_MS,
     maxDelayMs = NODE_MAX_DELAY_MS,
     signal,
+    random = Math.random,
   } = options;
+  const nodesById = new Map(nodes.map((n) => [n.id, n]));
 
+  handlers.onStart(order);
   for (const nodeId of order) {
-    if (signal?.aborted) return;
+    const node = nodesById.get(nodeId);
+    if (!node || signal?.aborted) return;
     handlers.onNodeRunning(nodeId);
     await randomDelay(minDelayMs, maxDelayMs);
     if (signal?.aborted) return;
+
+    const error = simulateNode(node, random);
+    if (error) {
+      handlers.onNodeError(nodeId, error);
+      handlers.onComplete('error');
+      return;
+    }
     handlers.onNodeSuccess(nodeId);
   }
   handlers.onComplete('success');
+}
+
+/**
+ * `POST /execute` — runs a workflow through the simulator, reporting progress
+ * via `handlers`, and persists and returns the finished run.
+ */
+export async function executeWorkflow(
+  request: ExecuteRequest,
+  handlers: ExecutionHandlers,
+  options: Omit<ExecutionOptions, 'signal'> = {},
+): Promise<ExecutionRecord> {
+  const order = computeRunOrder(request.nodes, request.edges);
+  const startedAt = Date.now();
+  let status: ExecutionRecord['status'] = 'success';
+
+  await simulateExecution(
+    request.nodes,
+    order,
+    {
+      ...handlers,
+      onComplete: (finalStatus) => {
+        status = finalStatus;
+        handlers.onComplete(finalStatus);
+      },
+    },
+    options,
+  );
+
+  const record: ExecutionRecord = {
+    id: crypto.randomUUID(),
+    workflowId: request.workflowId,
+    workflowName: request.workflowName,
+    status,
+    nodeCount: order.length,
+    startedAt: new Date(startedAt).toISOString(),
+    durationMs: Date.now() - startedAt,
+  };
+  appendExecution(record);
+  return record;
 }

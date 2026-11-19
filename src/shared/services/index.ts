@@ -11,6 +11,8 @@ export {
 export {
   computeRunOrder,
   simulateExecution,
+  executeWorkflow,
+  type ExecuteRequest,
   type ExecutionHandlers,
   type ExecutionOptions,
 } from './executionService';
